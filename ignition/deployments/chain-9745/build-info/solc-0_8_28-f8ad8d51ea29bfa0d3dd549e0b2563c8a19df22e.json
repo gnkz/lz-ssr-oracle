@@ -1,0 +1,51 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-f8ad8d51ea29bfa0d3dd549e0b2563c8a19df22e",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "lz-protocol/contracts/interfaces/ILayerZeroEndpointV2.sol": "npm/@layerzerolabs/lz-evm-protocol-v2@3.0.158/contracts/interfaces/ILayerZeroEndpointV2.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "npm/@layerzerolabs/lz-evm-protocol-v2@3.0.158/contracts/interfaces/ILayerZeroEndpointV2.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n\npragma solidity >=0.8.0;\n\nimport { IMessageLibManager } from \"./IMessageLibManager.sol\";\nimport { IMessagingComposer } from \"./IMessagingComposer.sol\";\nimport { IMessagingChannel } from \"./IMessagingChannel.sol\";\nimport { IMessagingContext } from \"./IMessagingContext.sol\";\n\nstruct MessagingParams {\n    uint32 dstEid;\n    bytes32 receiver;\n    bytes message;\n    bytes options;\n    bool payInLzToken;\n}\n\nstruct MessagingReceipt {\n    bytes32 guid;\n    uint64 nonce;\n    MessagingFee fee;\n}\n\nstruct MessagingFee {\n    uint256 nativeFee;\n    uint256 lzTokenFee;\n}\n\nstruct Origin {\n    uint32 srcEid;\n    bytes32 sender;\n    uint64 nonce;\n}\n\ninterface ILayerZeroEndpointV2 is IMessageLibManager, IMessagingComposer, IMessagingChannel, IMessagingContext {\n    event PacketSent(bytes encodedPayload, bytes options, address sendLibrary);\n\n    event PacketVerified(Origin origin, address receiver, bytes32 payloadHash);\n\n    event PacketDelivered(Origin origin, address receiver);\n\n    event LzReceiveAlert(\n        address indexed receiver,\n        address indexed executor,\n        Origin origin,\n        bytes32 guid,\n        uint256 gas,\n        uint256 value,\n        bytes message,\n        bytes extraData,\n        bytes reason\n    );\n\n    event LzTokenSet(address token);\n\n    event DelegateSet(address sender, address delegate);\n\n    function quote(MessagingParams calldata _params, address _sender) external view returns (MessagingFee memory);\n\n    function send(\n        MessagingParams calldata _params,\n        address _refundAddress\n    ) external payable returns (MessagingReceipt memory);\n\n    function verify(Origin calldata _origin, address _receiver, bytes32 _payloadHash) external;\n\n    function verifiable(Origin calldata _origin, address _receiver) external view returns (bool);\n\n    function initializable(Origin calldata _origin, address _receiver) external view returns (bool);\n\n    function lzReceive(\n        Origin calldata _origin,\n        address _receiver,\n        bytes32 _guid,\n        bytes calldata _message,\n        bytes calldata _extraData\n    ) external payable;\n\n    // oapp can burn messages partially by calling this function with its own business logic if messages are verified in order\n    function clear(address _oapp, Origin calldata _origin, bytes32 _guid, bytes calldata _message) external;\n\n    function setLzToken(address _lzToken) external;\n\n    function lzToken() external view returns (address);\n\n    function nativeToken() external view returns (address);\n\n    function setDelegate(address _delegate) external;\n}\n"
+      },
+      "npm/@layerzerolabs/lz-evm-protocol-v2@3.0.158/contracts/interfaces/IMessageLibManager.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n\npragma solidity >=0.8.0;\n\nstruct SetConfigParam {\n    uint32 eid;\n    uint32 configType;\n    bytes config;\n}\n\ninterface IMessageLibManager {\n    struct Timeout {\n        address lib;\n        uint256 expiry;\n    }\n\n    event LibraryRegistered(address newLib);\n    event DefaultSendLibrarySet(uint32 eid, address newLib);\n    event DefaultReceiveLibrarySet(uint32 eid, address newLib);\n    event DefaultReceiveLibraryTimeoutSet(uint32 eid, address oldLib, uint256 expiry);\n    event SendLibrarySet(address sender, uint32 eid, address newLib);\n    event ReceiveLibrarySet(address receiver, uint32 eid, address newLib);\n    event ReceiveLibraryTimeoutSet(address receiver, uint32 eid, address oldLib, uint256 timeout);\n\n    function registerLibrary(address _lib) external;\n\n    function isRegisteredLibrary(address _lib) external view returns (bool);\n\n    function getRegisteredLibraries() external view returns (address[] memory);\n\n    function setDefaultSendLibrary(uint32 _eid, address _newLib) external;\n\n    function defaultSendLibrary(uint32 _eid) external view returns (address);\n\n    function setDefaultReceiveLibrary(uint32 _eid, address _newLib, uint256 _gracePeriod) external;\n\n    function defaultReceiveLibrary(uint32 _eid) external view returns (address);\n\n    function setDefaultReceiveLibraryTimeout(uint32 _eid, address _lib, uint256 _expiry) external;\n\n    function defaultReceiveLibraryTimeout(uint32 _eid) external view returns (address lib, uint256 expiry);\n\n    function isSupportedEid(uint32 _eid) external view returns (bool);\n\n    function isValidReceiveLibrary(address _receiver, uint32 _eid, address _lib) external view returns (bool);\n\n    /// ------------------- OApp interfaces -------------------\n    function setSendLibrary(address _oapp, uint32 _eid, address _newLib) external;\n\n    function getSendLibrary(address _sender, uint32 _eid) external view returns (address lib);\n\n    function isDefaultSendLibrary(address _sender, uint32 _eid) external view returns (bool);\n\n    function setReceiveLibrary(address _oapp, uint32 _eid, address _newLib, uint256 _gracePeriod) external;\n\n    function getReceiveLibrary(address _receiver, uint32 _eid) external view returns (address lib, bool isDefault);\n\n    function setReceiveLibraryTimeout(address _oapp, uint32 _eid, address _lib, uint256 _expiry) external;\n\n    function receiveLibraryTimeout(address _receiver, uint32 _eid) external view returns (address lib, uint256 expiry);\n\n    function setConfig(address _oapp, address _lib, SetConfigParam[] calldata _params) external;\n\n    function getConfig(\n        address _oapp,\n        address _lib,\n        uint32 _eid,\n        uint32 _configType\n    ) external view returns (bytes memory config);\n}\n"
+      },
+      "npm/@layerzerolabs/lz-evm-protocol-v2@3.0.158/contracts/interfaces/IMessagingChannel.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n\npragma solidity >=0.8.0;\n\ninterface IMessagingChannel {\n    event InboundNonceSkipped(uint32 srcEid, bytes32 sender, address receiver, uint64 nonce);\n    event PacketNilified(uint32 srcEid, bytes32 sender, address receiver, uint64 nonce, bytes32 payloadHash);\n    event PacketBurnt(uint32 srcEid, bytes32 sender, address receiver, uint64 nonce, bytes32 payloadHash);\n\n    function eid() external view returns (uint32);\n\n    // this is an emergency function if a message cannot be verified for some reasons\n    // required to provide _nextNonce to avoid race condition\n    function skip(address _oapp, uint32 _srcEid, bytes32 _sender, uint64 _nonce) external;\n\n    function nilify(address _oapp, uint32 _srcEid, bytes32 _sender, uint64 _nonce, bytes32 _payloadHash) external;\n\n    function burn(address _oapp, uint32 _srcEid, bytes32 _sender, uint64 _nonce, bytes32 _payloadHash) external;\n\n    function nextGuid(address _sender, uint32 _dstEid, bytes32 _receiver) external view returns (bytes32);\n\n    function inboundNonce(address _receiver, uint32 _srcEid, bytes32 _sender) external view returns (uint64);\n\n    function outboundNonce(address _sender, uint32 _dstEid, bytes32 _receiver) external view returns (uint64);\n\n    function inboundPayloadHash(\n        address _receiver,\n        uint32 _srcEid,\n        bytes32 _sender,\n        uint64 _nonce\n    ) external view returns (bytes32);\n\n    function lazyInboundNonce(address _receiver, uint32 _srcEid, bytes32 _sender) external view returns (uint64);\n}\n"
+      },
+      "npm/@layerzerolabs/lz-evm-protocol-v2@3.0.158/contracts/interfaces/IMessagingComposer.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n\npragma solidity >=0.8.0;\n\ninterface IMessagingComposer {\n    event ComposeSent(address from, address to, bytes32 guid, uint16 index, bytes message);\n    event ComposeDelivered(address from, address to, bytes32 guid, uint16 index);\n    event LzComposeAlert(\n        address indexed from,\n        address indexed to,\n        address indexed executor,\n        bytes32 guid,\n        uint16 index,\n        uint256 gas,\n        uint256 value,\n        bytes message,\n        bytes extraData,\n        bytes reason\n    );\n\n    function composeQueue(\n        address _from,\n        address _to,\n        bytes32 _guid,\n        uint16 _index\n    ) external view returns (bytes32 messageHash);\n\n    function sendCompose(address _to, bytes32 _guid, uint16 _index, bytes calldata _message) external;\n\n    function lzCompose(\n        address _from,\n        address _to,\n        bytes32 _guid,\n        uint16 _index,\n        bytes calldata _message,\n        bytes calldata _extraData\n    ) external payable;\n}\n"
+      },
+      "npm/@layerzerolabs/lz-evm-protocol-v2@3.0.158/contracts/interfaces/IMessagingContext.sol": {
+        "content": "// SPDX-License-Identifier: MIT\n\npragma solidity >=0.8.0;\n\ninterface IMessagingContext {\n    function isSendingMessage() external view returns (bool);\n\n    function getSendContext() external view returns (uint32 dstEid, address sender);\n}\n"
+      }
+    }
+  }
+}

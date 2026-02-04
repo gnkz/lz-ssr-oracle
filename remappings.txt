@@ -1,0 +1,4 @@
+lz-oapp/=node_modules/@layerzerolabs/oapp-evm/
+lz-protocol/=node_modules/@layerzerolabs/lz-evm-protocol-v2/
+lz-messagelib/=node_modules/@layerzerolabs/lz-evm-messagelib-v2/
+lz-v1/=node_modules/@layerzerolabs/lz-evm-v1-0.7/
