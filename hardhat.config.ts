@@ -3,6 +3,15 @@ import { configVariable, defineConfig } from "hardhat/config";
 
 export default defineConfig({
   plugins: [hardhatToolboxViemPlugin],
+  test: {
+    solidity: {
+      forking: {
+        rpcEndpoints: {
+          mainnet: configVariable("MAINNET_RPC_URL"),
+        },
+      },
+    },
+  },
   solidity: {
     npmFilesToBuild: [
       "lz-protocol/contracts/interfaces/ILayerZeroEndpointV2.sol",
